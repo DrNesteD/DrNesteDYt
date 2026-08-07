@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Glitch SMP</title>
+<meta name="description" content="Glitch SMP — سرور ماینکرفت. رتبه، پول داخل بازی و آیتم بخرید.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #08080d;
+    --bg-panel: #101018;
+    --bg-panel-alt: #15151f;
+    --line: #23232f;
+    --cyan: #00fff2;
+    --magenta: #ff2fd0;
+    --gold: #ffcc00;
+    --lime: #baff29;
+    --text: #eaeaf2;
+    --text-dim: #8b8ba3;
+    --radius: 14px;
+    --pixel: 'Press Start 2P', system-ui, sans-serif;
+    --body: 'Vazirmatn', system-ui, sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.7;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* faint CRT scanlines + vignette, purely atmospheric */
+  .scanlines{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      repeating-linear-gradient(to bottom, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px),
+      radial-gradient(ellipse at 50% 0%, rgba(0,255,242,0.05), transparent 55%),
+      radial-gradient(ellipse at 90% 100%, rgba(255,47,208,0.05), transparent 55%);
+    mix-blend-mode:screen;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  ul{ list-style:none; }
+  button{ font-family:inherit; cursor:pointer; border:none; }
+
+  .wrap{ max-width:1160px; margin:0 auto; padding:0 24px; }
+
+  .eyebrow{
+    font-family:var(--pixel);
+    font-size:10px;
+    letter-spacing:1px;
+    color:var(--cyan);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{ content:'>'; color:var(--magenta); }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(10px);
+    background:rgba(8,8,13,0.75);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-inner{
+    max-width:1160px; margin:0 auto; padding:14px 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .logo{
+    font-family:var(--pixel);
+    font-size:14px;
+    color:var(--text);
+    display:flex; align-items:center; gap:4px;
+  }
+  .logo span{ color:var(--cyan); }
+  .nav-links{
+    display:flex; gap:22px; font-size:14px; color:var(--text-dim);
+  }
+  .nav-links a{ transition:color .2s; }
+  .nav-links a:hover{ color:var(--cyan); }
+  .nav-social{ display:flex; gap:10px; }
+  .icon-btn{
+    width:36px; height:36px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--bg-panel); border:1px solid var(--line);
+    transition:transform .2s, border-color .2s, color .2s;
+    color:var(--text-dim);
+  }
+  .icon-btn:hover{ transform:translateY(-2px); border-color:var(--cyan); color:var(--cyan); }
+  .nav-toggle{ display:none; }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative; z-index:2;
+    min-height:92vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:100px 20px 60px;
+    overflow:hidden;
+  }
+  .hero-blocks span{
+    position:absolute; width:10px; height:10px;
+    background:var(--cyan); opacity:.5;
+    animation:blockBlink 3.4s infinite ease-in-out;
+  }
+  @keyframes blockBlink{
+    0%,100%{ opacity:0; transform:scale(.4); }
+    50%{ opacity:.6; transform:scale(1); }
+  }
+
+  .glitch-title{
+    position:relative;
+    font-weight:900;
+    font-size:clamp(48px, 11vw, 128px);
+    letter-spacing:2px;
+    line-height:1;
+    color:var(--text);
+  }
+  .glitch-title::before,
+  .glitch-title::after{
+    content:attr(data-text);
+    position:absolute; inset:0;
+    background:var(--bg);
+    overflow:hidden;
+  }
+  .glitch-title::before{
+    color:var(--magenta);
+    left:3px;
+    clip-path: polygon(0 3%, 100% 3%, 100% 42%, 0 42%);
+    animation:glitchTop 4s infinite linear alternate-reverse;
+  }
+  .glitch-title::after{
+    color:var(--cyan);
+    left:-3px;
+    clip-path: polygon(0 60%, 100% 60%, 100% 95%, 0 95%);
+    animation:glitchBottom 3.2s infinite linear alternate-reverse;
+  }
+  @keyframes glitchTop{
+    0%{ transform:translate(0,0); }
+    20%{ transform:translate(-4px,-1px); }
+    40%{ transform:translate(4px,1px); }
+    60%{ transform:translate(-2px,0); }
+    80%{ transform:translate(3px,-1px); }
+    100%{ transform:translate(0,0); }
+  }
+  @keyframes glitchBottom{
+    0%{ transform:translate(0,0); }
+    25%{ transform:translate(4px,0); }
+    50%{ transform:translate(-3px,1px); }
+    75%{ transform:translate(2px,-1px); }
+    100%{ transform:translate(0,0); }
+  }
+
+  .hero-tag{
+    margin-top:22px;
+    font-size:clamp(15px, 2.4vw, 19px);
+    color:var(--text-dim);
+    max-width:560px;
+  }
+  .hero-cta{
+    margin-top:34px; display:flex; gap:14px; flex-wrap:wrap; justify-content:center;
+  }
+  .btn{
+    font-family:var(--body);
+    font-weight:700;
+    padding:14px 26px;
+    border-radius:10px;
+    font-size:15px;
+    transition:transform .18s, box-shadow .18s, background .18s, color .18s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn-primary{
+    background:var(--cyan); color:#04141a;
+    box-shadow:0 0 0 rgba(0,255,242,0.0);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 8px 26px rgba(0,255,242,.25); }
+  .btn-ghost{
+    background:transparent; color:var(--text); border:1px solid var(--line);
+  }
+  .btn-ghost:hover{ border-color:var(--magenta); color:var(--magenta); transform:translateY(-2px); }
+
+  .scroll-cue{
+    margin-top:70px; font-family:var(--pixel); font-size:9px; color:var(--text-dim);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    animation:bob 2s infinite ease-in-out;
+  }
+  .scroll-cue .line{ width:1px; height:34px; background:linear-gradient(var(--cyan), transparent); }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(8px);} }
+
+  /* ---------- SECTIONS ---------- */
+  .section{ position:relative; z-index:2; padding:110px 0 40px; }
+  .section.alt{ background:linear-gradient(180deg, transparent, rgba(255,255,255,0.015), transparent); }
+  .section-head{ margin-bottom:44px; }
+  .section-head h2{
+    font-size:clamp(26px, 4.4vw, 40px);
+    font-weight:800;
+  }
+  .section-head p{ color:var(--text-dim); margin-top:10px; max-width:560px; }
+
+  .reveal{
+    opacity:0; transform:translateY(26px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .reveal.visible{ opacity:1; transform:translateY(0); }
+
+  /* ---------- CARD GRIDS ---------- */
+  .grid{
+    display:grid; gap:18px;
+    grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+  }
+  .card{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px 20px;
+    display:flex; flex-direction:column; gap:12px;
+    position:relative;
+    transition:transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .card:hover{
+    transform:translateY(-6px);
+    border-color:var(--cyan);
+    box-shadow:0 14px 34px rgba(0,255,242,.08);
+  }
+  .card.featured{ border-color:var(--gold); }
+  .card.featured:hover{ box-shadow:0 14px 34px rgba(255,204,0,.14); }
+
+  .tag{
+    font-family:var(--pixel); font-size:9px; color:var(--magenta);
+    letter-spacing:1px; width:fit-content;
+  }
+  .card.featured .tag{ color:var(--gold); }
+
+  .ribbon{
+    position:absolute; top:14px; left:14px;
+    font-family:var(--pixel); font-size:8px; color:#241a00;
+    background:var(--gold); padding:5px 8px; border-radius:6px;
+  }
+
+  .card h3{ font-size:20px; font-weight:800; }
+  .price{ font-size:22px; font-weight:800; color:var(--cyan); }
+  .card.featured .price{ color:var(--gold); }
+  .price .unit{ font-size:13px; color:var(--text-dim); font-weight:500; margin-right:4px; }
+
+  .perks{ display:flex; flex-direction:column; gap:7px; flex:1; }
+  .perks li{ font-size:13px; color:var(--text-dim); display:flex; gap:8px; align-items:flex-start; }
+  .perks li::before{ content:'▸'; color:var(--cyan); flex-shrink:0; }
+  .card.featured .perks li::before{ color:var(--gold); }
+
+  .order-btn{
+    margin-top:8px;
+    background:var(--bg-panel-alt);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:11px 14px; border-radius:8px; font-weight:700; font-size:14px;
+    transition:background .2s, border-color .2s, color .2s;
+  }
+  .order-btn:hover{ background:var(--cyan); color:#04141a; border-color:var(--cyan); }
+  .card.featured .order-btn:hover{ background:var(--gold); }
+
+  /* ---------- ORDER SECTION ---------- */
+  .order-panel{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:26px;
+    max-width:520px;
+    margin-bottom:40px;
+  }
+  .order-panel label{ font-size:13px; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .order-panel input{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--line);
+    color:var(--text);
+    padding:13px 14px;
+    border-radius:8px;
+    font-family:var(--body);
+    font-size:15px;
+    transition:border-color .2s;
+  }
+  .order-panel input:focus{ outline:none; border-color:var(--cyan); }
+  .order-panel .hint{ font-size:12px; color:var(--text-dim); margin-top:10px; }
+  .error-text{ font-size:12px; color:var(--magenta); margin-top:8px; display:none; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    25%{ transform:translateX(-6px); }
+    75%{ transform:translateX(6px); }
+  }
+  .shake{ animation:shake .3s ease; }
+
+  /* ---------- CONTACT ---------- */
+  .contact-box{
+    background:var(--bg-panel);
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    padding:26px; max-width:620px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .contact-box a.tg-id{
+    display:inline-flex; align-items:center; gap:8px;
+    color:var(--cyan); font-weight:700; width:fit-content;
+    border-bottom:1px dashed var(--cyan); padding-bottom:2px;
+    transition:color .2s, border-color .2s;
+  }
+  .contact-box a.tg-id:hover{ color:var(--magenta); border-color:var(--magenta); }
+
+  /* ---------- TOAST / MODAL ---------- */
+  .toast-overlay{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(4,4,8,0.72);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .toast-overlay.show{ opacity:1; pointer-events:auto; }
+  .toast-box{
+    background:var(--bg-panel);
+    border:1px solid var(--cyan);
+    border-radius:16px;
+    padding:32px 26px;
+    max-width:420px; width:100%;
+    text-align:center;
+    position:relative;
+    transform:translateY(16px) scale(.97);
+    transition:transform .25s ease;
+    box-shadow:0 20px 60px rgba(0,255,242,.12);
+  }
+  .toast-overlay.show .toast-box{ transform:translateY(0) scale(1); }
+  .toast-close{
+    position:absolute; top:10px; left:14px;
+    background:none; color:var(--text-dim); font-size:20px;
+  }
+  .toast-close:hover{ color:var(--magenta); }
+  .toast-box .toast-icon{ font-family:var(--pixel); font-size:11px; color:var(--lime); margin-bottom:14px; }
+  #toast-message{ font-size:15px; line-height:1.9; }
+  #toast-order-summary{ font-size:13px; color:var(--text-dim); margin-top:12px; border-top:1px solid var(--line); padding-top:12px; }
+  .toast-links{ display:flex; gap:10px; margin-top:22px; }
+  .toast-links a{
+    flex:1; padding:12px; border-radius:9px; font-weight:700; font-size:14px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:transform .18s;
+  }
+  .toast-links a:hover{ transform:translateY(-2px); }
+  .toast-links a.discord{ background:#5865F2; color:#fff; }
+  .toast-links a.telegram{ background:#2AABEE; color:#fff; }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    position:relative; z-index:2;
+    border-top:1px solid var(--line);
+    padding:44px 0 30px;
+    margin-top:60px;
+  }
+  .footer-inner{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:18px;
+  }
+  .footer-note{ font-size:13px; color:var(--text-dim); }
+
+  /* ---------- MOBILE ---------- */
+  @media (max-width:760px){
+    .nav-links{
+      position:fixed; top:64px; right:0; left:0;
+      background:var(--bg-panel);
+      border-bottom:1px solid var(--line);
+      flex-direction:column; padding:16px 24px; gap:16px;
+      transform:translateY(-130%);
+      transition:transform .3s ease;
+    }
+    .nav-links.open{ transform:translateY(0); }
+    .nav-toggle{
+      display:flex; flex-direction:column; gap:4px; background:none;
+      width:26px;
+    }
+    .nav-toggle span{ height:2px; background:var(--text); border-radius:2px; }
+    .hero{ min-height:80vh; padding-top:90px; }
+    .section{ padding:80px 0 20px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanlines" aria-hidden="true"></div>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo">GLITCH<span>_</span>SMP</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#ranks">رتبه‌ها</a></li>
+      <li><a href="#money">پول داخل بازی</a></li>
+      <li><a href="#items">آیتم‌ها</a></li>
+      <li><a href="#order">سفارش</a></li>
+      <li><a href="#contact">سفارش سفارشی</a></li>
+    </ul>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div class="nav-social">
+        <a class="icon-btn" href="https://discord.gg/cxpVMR8Vg" target="_blank" rel="noopener" aria-label="Discord" title="Discord">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 12h.01M16 12h.01M6 8c3-1 9-1 12 0l1.5 9c-2 1.5-4 2-6 2l-1-1.5c-2 .3-3 .3-5 0L6.5 19c-2 0-4-.5-6-2L2 8c3-1 1-1 4-1"/></svg>
+        </a>
+        <a class="icon-btn" href="https://t.me/Glitch_smp" target="_blank" rel="noopener" aria-label="Telegram" title="Telegram">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 4 3 11l6 2m12-9-4 16-8-5m12-11L9 13"/></svg>
+        </a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="منو"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="hero-blocks" aria-hidden="true"></div>
+  <h1 class="glitch-title" data-text="GLITCH SMP">GLITCH SMP</h1>
+  <p class="hero-tag">یک سرور ماینکرفت که مثل بقیه نیست. رتبه بگیر، پول جمع کن، وسایلتو کامل کن و بازی رو مال خودت کن.</p>
+  <div class="hero-cta">
+    <a href="#ranks" class="btn btn-primary">مشاهده رتبه‌ها</a>
+    <a href="https://discord.gg/cxpVMR8Vg" target="_blank" rel="noopener" class="btn btn-ghost">پیوستن به دیسکورد</a>
+  </div>
+  <div class="scroll-cue"><span>SCROLL</span><span class="line"></span></div>
+</header>
+
+<main>
+
+  <!-- RANKS -->
+  <section class="section" id="ranks">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">RANK SYSTEM</span>
+        <h2>رتبه‌ها</h2>
+        <p>هر رتبه یه سری امکانات ویژه به شخصیتت اضافه می‌کنه. از MEMBER شروع کن تا برسی به MVP+.</p>
+      </div>
+
+      <div class="grid">
+
+        <article class="card reveal">
+          <span class="tag decode">TIER 01</span>
+          <h3 class="decode">MEMBER</h3>
+          <p class="price"><span class="decode">۳۰</span><span class="unit">تومن</span></p>
+          <ul class="perks">
+            <li>تگ رنگی مخصوص در چت</li>
+            <li>یک کیت پایه روزانه</li>
+            <li>ورود زودتر موقع باز شدن سرور</li>
+          </ul>
+          <button class="order-btn" data-item="رنک MEMBER" data-price="۳۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">TIER 02</span>
+          <h3 class="decode">VIP</h3>
+          <p class="price"><span class="decode">۷۰</span><span class="unit">تومن</span></p>
+          <ul class="perks">
+            <li>همه‌ی مزایای MEMBER</li>
+            <li>پرچم VIP در تب‌لیست</li>
+            <li>دو کیت ویژه در هفته</li>
+          </ul>
+          <button class="order-btn" data-item="رنک VIP" data-price="۷۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">TIER 03</span>
+          <h3 class="decode">SPONSER</h3>
+          <p class="price"><span class="decode">۱۲۰</span><span class="unit">تومن</span></p>
+          <ul class="perks">
+            <li>همه‌ی مزایای VIP</li>
+            <li>دستور /hat و /heal</li>
+            <li>اسلات کلیم زمین بیشتر</li>
+          </ul>
+          <button class="order-btn" data-item="رنک SPONSER" data-price="۱۲۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">TIER 04</span>
+          <h3 class="decode">MVP</h3>
+          <p class="price"><span class="decode">۲۰۰</span><span class="unit">تومن</span></p>
+          <ul class="perks">
+            <li>همه‌ی مزایای SPONSER</li>
+            <li>کیت روزانه‌ی پیشرفته</li>
+            <li>رنگ نام اختصاصی در چت</li>
+          </ul>
+          <button class="order-btn" data-item="رنک MVP" data-price="۲۰۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card featured reveal">
+          <span class="ribbon">محبوب‌ترین</span>
+          <span class="tag decode">TIER 05</span>
+          <h3 class="decode">MVP+</h3>
+          <p class="price"><span class="decode">۳۰۰</span><span class="unit">تومن</span></p>
+          <ul class="perks">
+            <li>همه‌ی مزایای MVP</li>
+            <li>دسترسی به /fly در اسپان</li>
+            <li>کیت افسانه‌ای هفتگی</li>
+            <li>پرچم ویژه در دیسکورد سرور</li>
+          </ul>
+          <button class="order-btn" data-item="رنک MVP+" data-price="۳۰۰ تومن">سفارش</button>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- MONEY -->
+  <section class="section alt" id="money">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">IN-GAME CURRENCY</span>
+        <h2>پول داخل بازی</h2>
+        <p>برای پیشرفت سریع‌تر توی سرور می‌تونی پول داخل بازی بخری.</p>
+      </div>
+
+      <div class="grid">
+        <article class="card reveal">
+          <span class="tag decode">CASH</span>
+          <h3 class="decode">کیف پول</h3>
+          <p class="price"><span class="decode">۱۰,۰۰۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="کیف پول" data-price="۱۰,۰۰۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">CASH</span>
+          <h3 class="decode">کامیون پول</h3>
+          <p class="price"><span class="decode">۱۰۰,۰۰۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="کامیون پول" data-price="۱۰۰,۰۰۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">CASH</span>
+          <h3 class="decode">خونه پول</h3>
+          <p class="price"><span class="decode">۱,۰۰۰,۰۰۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="خونه پول" data-price="۱,۰۰۰,۰۰۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card featured reveal">
+          <span class="tag decode">CASH</span>
+          <h3 class="decode">هوارتا</h3>
+          <p class="price"><span class="decode">۱۰,۰۰۰,۰۰۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="هوارتا" data-price="۱۰,۰۰۰,۰۰۰ تومن">سفارش</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ITEMS -->
+  <section class="section" id="items">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">ITEM SHOP</span>
+        <h2>آیتم‌های بازی</h2>
+        <p>ست‌های آماده برای رفتن مستقیم به میدون جنگ.</p>
+      </div>
+
+      <div class="grid">
+        <article class="card reveal">
+          <span class="tag decode">SET</span>
+          <h3 class="decode">ست ندرایتی</h3>
+          <p class="price"><span class="decode">۲۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="ست ندرایتی" data-price="۲۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card featured reveal">
+          <span class="tag decode">SET</span>
+          <h3 class="decode">ست فول ندرایتی اینچنتی</h3>
+          <p class="price"><span class="decode">۳۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="ست فول ندرایتی اینچنتی" data-price="۳۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">SET</span>
+          <h3 class="decode">ست دایمندی</h3>
+          <p class="price"><span class="decode">۱۰</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="ست دایمندی" data-price="۱۰ تومن">سفارش</button>
+        </article>
+
+        <article class="card reveal">
+          <span class="tag decode">SET</span>
+          <h3 class="decode">ست فول اینچنت دایمندی</h3>
+          <p class="price"><span class="decode">۱۵</span><span class="unit">تومن</span></p>
+          <button class="order-btn" data-item="ست فول اینچنت دایمندی" data-price="۱۵ تومن">سفارش</button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDER -->
+  <section class="section alt" id="order">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">PLACE ORDER</span>
+        <h2>سفارش بده</h2>
+        <p>اول اسمت رو بنویس، بعد از هر بخش بالا روی دکمه‌ی «سفارش» بزن.</p>
+      </div>
+
+      <div class="order-panel reveal">
+        <label for="usernameInput">نام یا آیدی شما</label>
+        <input id="usernameInput" type="text" placeholder="مثلاً: Ali_2011" autocomplete="off">
+        <p class="error-text" id="errorText">لطفاً قبل از سفارش، نام خودتون رو وارد کنید.</p>
+        <p class="hint">با زدن دکمه‌ی سفارش روی هر آیتم، متن سفارش کپی می‌شه و بهت می‌گیم کجا بفرستیش.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CUSTOM ORDER / CONTACT -->
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">CUSTOM ORDER</span>
+        <h2>سفارش‌های دیگر</h2>
+      </div>
+      <div class="contact-box reveal">
+        <p>اگه چیزی که می‌خوای بالا نبود، مستقیم توی تلگرام به این آیدی پیام بده:</p>
+        <a class="tg-id" href="https://t.me/DrNesteD" target="_blank" rel="noopener">@DrNesteD ↗</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-inner">
+    <div class="logo">GLITCH<span>_</span>SMP</div>
+    <div class="nav-social">
+      <a class="icon-btn" href="https://discord.gg/cxpVMR8Vg" target="_blank" rel="noopener" aria-label="Discord">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 12h.01M16 12h.01M6 8c3-1 9-1 12 0l1.5 9c-2 1.5-4 2-6 2l-1-1.5c-2 .3-3 .3-5 0L6.5 19c-2 0-4-.5-6-2L2 8c3-1 1-1 4-1"/></svg>
+      </a>
+      <a class="icon-btn" href="https://t.me/Glitch_smp" target="_blank" rel="noopener" aria-label="Telegram">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 4 3 11l6 2m12-9-4 16-8-5m12-11L9 13"/></svg>
+      </a>
+    </div>
+    <p class="footer-note">© Glitch SMP — تمام حقوق محفوظ است.</p>
+  </div>
+</footer>
+
+<!-- ORDER CONFIRMATION MODAL -->
+<div class="toast-overlay" id="toastOverlay">
+  <div class="toast-box">
+    <button class="toast-close" id="toastClose" aria-label="بستن">×</button>
+    <div class="toast-icon">ORDER RECEIVED</div>
+    <p id="toast-message">سفارش شما برایتان کپی شد و حالا شما باید به لینک‌های زیر که برای تلگرام و دیسکورد هست، توی یکیشون برید و سفارش رو ارسال کنید.</p>
+    <p id="toast-order-summary"></p>
+    <div class="toast-links">
+      <a class="discord" href="https://discord.gg/cxpVMR8Vg" target="_blank" rel="noopener">دیسکورد</a>
+      <a class="telegram" href="https://t.me/Glitch_smp" target="_blank" rel="noopener">تلگرام</a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* mobile nav toggle */
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
+  navToggle.addEventListener('click', function(){
+    navLinks.classList.toggle('open');
+  });
+  navLinks.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){ navLinks.classList.remove('open'); });
+  });
+
+  /* ---------- glitch decode text effect ---------- */
+  var glitchChars = "!<>-_\\/[]{}=+*^?#01ابجدهوزحطیکلمنسعفصقرشتثخذضظغپچژگABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+  function decodeText(el){
+    if(reduceMotion) return;
+    var original = el.textContent;
+    if(el.dataset.decoded === 'true') return;
+    el.dataset.decoded = 'true';
+    var len = original.length;
+    var revealed = 0;
+    var frame = 0;
+    clearInterval(el._glitchTimer);
+    el._glitchTimer = setInterval(function(){
+      frame++;
+      if(frame % 2 === 0) revealed++;
+      var out = "";
+      for(var i=0; i<len; i++){
+        var ch = original[i];
+        if(ch === ' '){ out += ' '; continue; }
+        if(i < revealed){ out += ch; }
+        else{ out += glitchChars[Math.floor(Math.random()*glitchChars.length)]; }
+      }
+      el.textContent = out;
+      if(revealed >= len){
+        el.textContent = original;
+        clearInterval(el._glitchTimer);
+      }
+    }, 35);
+  }
+
+  /* hero title decodes on load */
+  window.addEventListener('load', function(){
+    var hero = document.querySelector('.glitch-title');
+    if(hero && !reduceMotion){
+      // subtle immediate flicker only, keep readable title intact
+    }
+  });
+
+  /* scroll reveal for sections + cards, and text decode for headings/prices */
+  var revealObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.15, rootMargin:'0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(function(el, i){
+    el.style.transitionDelay = (Math.min(i % 5, 4) * 70) + 'ms';
+    revealObserver.observe(el);
+  });
+
+  var decodeObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        decodeText(entry.target);
+        decodeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.4 });
+
+  document.querySelectorAll('.decode').forEach(function(el){
+    decodeObserver.observe(el);
+  });
+
+  /* ---------- order flow ---------- */
+  var usernameInput = document.getElementById('usernameInput');
+  var errorText = document.getElementById('errorText');
+  var toastOverlay = document.getElementById('toastOverlay');
+  var toastMessage = document.getElementById('toast-message');
+  var toastSummary = document.getElementById('toast-order-summary');
+  var toastClose = document.getElementById('toastClose');
+
+  // ✏️ متن پیام تایید سفارش را می‌تونی همینجا تغییر بدی:
+  var CONFIRM_MESSAGE = "سفارش شما برایتان کپی شد و حالا شما باید به لینک‌های زیر که برای تلگرام و دیسکورد هست، توی یکیشون برید و سفارش رو ارسال کنید.";
+
+  function copyToClipboard(text){
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).catch(function(){ fallbackCopy(text); });
+    } else {
+      fallbackCopy(text);
+    }
+  }
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  function openToast(item, price, name){
+    toastMessage.textContent = CONFIRM_MESSAGE;
+    toastSummary.textContent = 'سفارش: ' + item + ' — ' + price + ' | نام: ' + name;
+    toastOverlay.classList.add('show');
+  }
+  function closeToast(){ toastOverlay.classList.remove('show'); }
+  toastClose.addEventListener('click', closeToast);
+  toastOverlay.addEventListener('click', function(e){
+    if(e.target === toastOverlay) closeToast();
+  });
+
+  document.querySelectorAll('.order-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var name = usernameInput.value.trim();
+      var item = btn.getAttribute('data-item');
+      var price = btn.getAttribute('data-price');
+
+      if(!name){
+        errorText.style.display = 'block';
+        usernameInput.classList.add('shake');
+        usernameInput.focus();
+        setTimeout(function(){ usernameInput.classList.remove('shake'); }, 320);
+        return;
+      }
+      errorText.style.display = 'none';
+
+      var orderText = "سفارش Glitch SMP\nنام: " + name + "\nآیتم: " + item + "\nقیمت: " + price;
+      copyToClipboard(orderText);
+      openToast(item, price, name);
+    });
+  });
+
+  usernameInput.addEventListener('input', function(){
+    if(usernameInput.value.trim()) errorText.style.display = 'none';
+  });
+})();
+</script>
+
+</body>
+</html>
