@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c9e4d2">
+  <title>Admin — DRNESTED</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="scripts/config.js" defer></script>
+  <script src="scripts/admin.js" defer></script>
+</head>
+<body class="admin-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="DRNESTED home">
+      <img src="assets/character.png" alt="" class="brand-mark">
+      <span class="brand-wordmark">DRNESTED<span class="brand-dot">.</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation"><a href="./">← Public site</a></nav>
+  </header>
+  <main id="main" class="admin-main">
+    <section id="login-panel" class="login-panel">
+      <p class="eyebrow">RESTRICTED AREA / 01</p>
+      <h1>Admin <span>access.</span></h1>
+      <p class="muted">Sign in to create and manage feed posts on this browser.</p>
+      <form id="login-form" class="stack-form">
+        <label for="admin-password">Admin password</label>
+        <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-dark" type="submit">Unlock dashboard ↗</button>
+        <p id="login-message" class="form-message" role="alert"></p>
+      </form>
+      <p class="security-note"><strong>Important:</strong> this is a static demo login, not real security. The password is visible in the JavaScript source. Posts are saved only in this browser's local storage.</p>
+    </section>
+
+    <section id="dashboard" class="dashboard hidden">
+      <div class="dashboard-heading">
+        <div><p class="eyebrow">CONTENT CONTROL / 02</p><h1>Manage the <span>feed.</span></h1></div>
+        <button id="logout-button" class="button button-outline" type="button">Lock dashboard</button>
+      </div>
+      <div class="admin-columns">
+        <section class="editor-card">
+          <h2 id="editor-title">Create a post</h2>
+          <form id="post-form" class="stack-form">
+            <input id="post-id" type="hidden">
+            <label for="post-title">Title <span aria-hidden="true">*</span></label>
+            <input id="post-title" name="title" maxlength="120" required>
+            <label for="post-date">Date <span aria-hidden="true">*</span></label>
+            <input id="post-date" name="date" type="date" required>
+            <label for="post-type">Post type</label>
+            <select id="post-type" name="type">
+              <option value="video">New video</option>
+              <option value="news">News</option>
+              <option value="update">Update</option>
+            </select>
+            <label for="post-text">Short description <span aria-hidden="true">*</span></label>
+            <textarea id="post-text" name="text" rows="5" maxlength="600" required></textarea>
+            <label for="post-url">Link URL (optional)</label>
+            <input id="post-url" name="url" type="url" placeholder="https://…">
+            <label for="post-embed">YouTube video ID (optional)</label>
+            <input id="post-embed" name="embed" placeholder="e.g. dQw4w9WgXcQ" maxlength="30">
+            <p class="field-hint">Enter only the YouTube video ID, not the full URL. Leave blank if you don't want an embed.</p>
+            <div class="form-actions">
+              <button class="button button-dark" type="submit">Save post</button>
+              <button id="cancel-edit" class="button button-outline hidden" type="button">Cancel edit</button>
+            </div>
+            <p id="save-message" class="form-message" role="status"></p>
+          </form>
+        </section>
+        <section class="posts-manager">
+          <div class="manager-heading"><h2>Existing posts</h2><span id="post-count" class="count-pill">0 posts</span></div>
+          <div id="admin-post-list" class="admin-post-list"></div>
+          <div class="data-tools">
+            <h3>Move posts to the live site</h3>
+            <p>Browser storage is not published to GitHub Pages. Export your posts, then replace <code>DEFAULT_POSTS</code> in <code>scripts/config.js</code> with the exported array and commit the change.</p>
+            <div class="form-actions">
+              <button id="export-button" class="button button-outline" type="button">Export posts JSON</button>
+              <label class="button button-outline file-button" for="import-file">Import JSON</label>
+              <input id="import-file" class="visually-hidden" type="file" accept="application/json,.json">
+            </div>
+            <p id="data-message" class="form-message" role="status"></p>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><a class="footer-brand" href="./">DRNESTED<span class="mint-period">.</span></a><p>Static site • Local browser storage</p><span class="footer-copy">Keep it weird. Keep it blocky.</span></footer>
+</body>
+</html>

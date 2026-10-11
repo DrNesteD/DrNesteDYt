@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#c9e4d2">
+  <meta name="description" content="DRNESTED — Minecraft videos, community news, and updates.">
+  <title>DRNESTED — Videos & News</title>
+  <link rel="stylesheet" href="assets/styles.css">
+  <script src="scripts/config.js" defer></script>
+  <script src="scripts/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="DRNESTED home">
+      <img src="assets/character.png" alt="" class="brand-mark">
+      <span class="brand-wordmark">DRNESTED<span class="brand-dot">.</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="#updates">Updates</a>
+      <a href="#community">Community</a>
+      <a class="nav-admin" href="admin.html">Admin ↗</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot"></span> MINECRAFT • VIDEOS • COMMUNITY</p>
+        <h1>Stay in the <span>loop.</span></h1>
+        <p class="hero-intro">New videos, Minecraft news, server updates, and everything happening in the DRNESTED universe — all in one place.</p>
+        <a class="button button-dark" href="#updates">Explore updates <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-art" aria-label="DRNESTED character artwork">
+        <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+        <span class="art-label label-top">BLOCK / 001</span>
+        <img src="assets/character.png" alt="Pale mint and black geometric Minecraft-style character" class="hero-character">
+        <span class="art-label label-bottom">DRNESTED // ONLINE</span>
+        <span class="art-cross cross-one">+</span><span class="art-cross cross-two">+</span>
+      </div>
+      <div class="hero-index" aria-hidden="true"><span>01</span><span class="index-line"></span><span>THE FEED</span></div>
+    </section>
+
+    <section class="updates-section section-wrap" id="updates">
+      <div class="section-heading">
+        <div><p class="eyebrow">THE LATEST</p><h2>Fresh from the feed<span class="mint-period">.</span></h2></div>
+        <p class="section-note">Videos, announcements, and news<br>— newest first.</p>
+      </div>
+      <div id="posts" class="post-grid" aria-live="polite">
+        <p class="empty-state">Loading updates…</p>
+      </div>
+    </section>
+
+    <section class="community-section section-wrap" id="community">
+      <div class="section-heading">
+        <div><p class="eyebrow">FIND YOUR PEOPLE</p><h2>Join the community<span class="mint-period">.</span></h2></div>
+        <p class="section-note">The conversation continues<br>outside the feed.</p>
+      </div>
+      <div id="community-links" class="community-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="footer-brand" href="./">DRNESTED<span class="mint-period">.</span></a>
+    <p>Built for blocks, stories, and the community.</p>
+    <a href="admin.html">Admin access ↗</a>
+    <span class="footer-copy">© <span id="year"></span> DRNESTED</span>
+  </footer>
+</body>
+</html>
